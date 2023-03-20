@@ -58,9 +58,11 @@ def menu_funcionario(prod: Produtos):
             quantidade: int = verifica_int('Digite a quantidade: ')
             prod.remover_produto_estoque(produto, quantidade)
         elif opcao == 4:
-            pass
+            prod.carregar_produtos()
+            sleep(2)
         elif opcao == 5:
-            pass
+            prod.guardar_produtos()
+            sleep(2)
         elif opcao == 6:
             menu_base(prod)
         elif opcao == 7:
