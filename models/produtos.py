@@ -156,11 +156,10 @@ class Produtos:
         from json import dumps
         from datetime import datetime
 
-        data = datetime.now()
+        data: datetime = datetime.now()
 
         with open('dados\\info_estoque.json', 'w', encoding='UTF-8') as arquivo:
-            data = datetime.now()
-            ret = dumps({'Produtos': self.estoque, 'Historico': [f'{data.strftime("%d/%m/%Y")}', f'{data.strftime("%H:%M:%S")}']})
+            ret: str = dumps({'Produtos': self.estoque, 'Historico': [f'{data.strftime("%d/%m/%Y")}', f'{data.strftime("%H:%M:%S")}']})
             arquivo.write(ret)
         print('Dados do estoque armazenados.')
 
@@ -169,13 +168,13 @@ class Produtos:
         import json
         import os
 
-        decisao = verifica_decisao('Tem certeza que deseja sobrescrever o estoque atual? [S/N] ')
+        decisao: str = verifica_decisao('Tem certeza que deseja sobrescrever o estoque atual? [S/N] ')
 
         if decisao == 'S':
-            caminho = 'dados\\info_estoque.json'
+            caminho: str = 'dados\\info_estoque.json'
             if os.path.exists(caminho):
                 with open(caminho, 'r', encoding='UTF-8') as arquivo:
-                    ret = json.load(arquivo)
+                    ret: dict = json.load(arquivo)
 
                 self.estoque = ret['Produtos']
                 print('Estoque atualizado.')

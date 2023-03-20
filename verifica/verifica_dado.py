@@ -27,7 +27,7 @@ def verifica_float(mensagem: str) -> float:
 def verifica_decisao(mensagem: str) -> str:
     while True:
         try:
-            opcao = str(input(mensagem)).strip().upper()[0]
+            opcao: str = str(input(mensagem)).strip().upper()[0]
         except (TypeError, ValueError):
             print('Digite uma opção válida!')
         except KeyboardInterrupt:
