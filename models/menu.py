@@ -1,12 +1,9 @@
 from verifica.verifica_dado import verifica_int, verifica_float
-from models.produtos import Produtos
+from models.produtos import Produto, Estoque, Carrinho
 from time import sleep
 
 
-def menu_base(prod: Produtos = None):
-    if prod is None:
-        prod = Produtos()
-
+def menu_base():
     while True:
         print('-' * 60)
         print('Mercadinho Hype'.center(60, '-'))
@@ -20,16 +17,18 @@ def menu_base(prod: Produtos = None):
         opcao: int = verifica_int('Digite a opção: ')
 
         if opcao == 1:
-            menu_funcionario(prod)
+            menu_funcionario()
         elif opcao == 2:
-            menu_cliente(prod)
+            menu_cliente()
         elif opcao == 3:
             break
         else:
             print('Opção inválida!')
 
 
-def menu_funcionario(prod: Produtos):
+def menu_funcionario():
+    estoque: Estoque = Estoque()
+
     while True:
         print('-' * 60)
 
@@ -37,34 +36,35 @@ def menu_funcionario(prod: Produtos):
         print('1 - Cadastrar produto')
         print('2 - Listar produtos')
         print('3 - Remover produto')
-        print('4 - Carregar produtos do sistema')
-        print('5 - Guardar produtos no sistema')
+        print('4 - Guardar produtos no sistema')
+        print('5 - Carregar produtos do sistema')
         print('6 - Voltar')
         print('7 - Sair do sistema')
 
         opcao: int = verifica_int('Digite a opção: ')
 
         if opcao == 1:
-            produto: str = str(input('Digite o nome do produto: '))
+            nome: str = str(input('Digite o nome do produto: '))
             preco: float = verifica_float('Digite o preço do produto: ')
             quantidade: int = verifica_int('Digite a quantidade: ')
-            prod.cadastrar_produto_estoque(produto, preco, quantidade)
+            produto = Produto(nome, preco, quantidade)
+            estoque.cadastrar_produto_estoque(produto)
             sleep(2)
         elif opcao == 2:
-            prod.listar_produtos_estoque()
+            estoque.listar_produtos_estoque()
             sleep(2)
         elif opcao == 3:
             produto: str = str(input('Digite o nome do produto: '))
             quantidade: int = verifica_int('Digite a quantidade: ')
-            prod.remover_produto_estoque(produto, quantidade)
+            estoque.remover_produto_estoque(produto, quantidade)
         elif opcao == 4:
-            prod.carregar_produtos()
+            estoque.guardar_produtos()
             sleep(2)
         elif opcao == 5:
-            prod.guardar_produtos()
+            estoque.carregar_produtos()
             sleep(2)
         elif opcao == 6:
-            menu_base(prod)
+            menu_base()
         elif opcao == 7:
             print('Volte sempre :)')
             sleep(1)
@@ -73,7 +73,9 @@ def menu_funcionario(prod: Produtos):
             print('Opção inválida!')
 
 
-def menu_cliente(prod: Produtos):
+def menu_cliente():
+    carrinho: Carrinho = Carrinho()
+
     while True:
         print('-' * 60)
 
@@ -89,25 +91,27 @@ def menu_cliente(prod: Produtos):
         opcao: int = verifica_int('Digite a opção: ')
 
         if opcao == 1:
-            prod.listar_produtos_estoque()
+            carrinho.estoque.listar_produtos_estoque()
             sleep(2)
         elif opcao == 2:
             produto: str = str(input('Digite o nome do produto: '))
-            prod.adicionar_produto_carrinho(produto)
+            quantidade = verifica_int('Digite a quantidade: ')
+            carrinho.adicionar_produto_carrinho(produto, quantidade)
             sleep(2)
         elif opcao == 3:
             produto: str = str(input('Digite o nome do produto: '))
-            prod.remover_produto_carrinho(produto)
+            quantidade = verifica_int('Digite a quantidade: ')
+            carrinho.remover_produto_carrinho(produto, quantidade)
         elif opcao == 4:
-            prod.visualizar_carrinho()
+            carrinho.visualizar_carrinho()
             sleep(2)
         elif opcao == 5:
-            prod.finalizar_carrinho()
+            carrinho.finalizar_carrinho()
             print('Volte sempre :)')
             sleep(1)
             exit()
         elif opcao == 6:
-            menu_base(prod)
+            menu_base()
         elif opcao == 7:
             print('Volte sempre :)')
             sleep(1)

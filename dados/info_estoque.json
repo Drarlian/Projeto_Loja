@@ -1,1 +1,1 @@
-{"Produtos": [["banana", 7.65, 5], ["uva", 1.25, 20], ["laranja", 8.15, 10]], "Historico": ["19/03/2023", "22:12:00"]}
+{"Produtos": [{"py/object": "models.produtos.Produto", "_Produto__id": 1, "_Produto__nome": "banana", "_Produto__preco": 7.65, "_Produto__quantidade": 5}, {"py/object": "models.produtos.Produto", "_Produto__id": 2, "_Produto__nome": "uva", "_Produto__preco": 1.25, "_Produto__quantidade": 20}], "Historico": ["22/03/2023", "00:03:02"]}

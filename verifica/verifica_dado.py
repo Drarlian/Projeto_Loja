@@ -1,7 +1,7 @@
 def verifica_int(mensagem: str) -> int:
     while True:
         try:
-            valor = int(input(mensagem))
+            valor: int = int(input(mensagem))
         except (ValueError, TypeError):
             print('Digite uma opção válida!')
         except KeyboardInterrupt:
@@ -14,7 +14,7 @@ def verifica_int(mensagem: str) -> int:
 def verifica_float(mensagem: str) -> float:
     while True:
         try:
-            valor = float(input(mensagem))
+            valor: float = float(input(mensagem))
         except (ValueError, TypeError):
             print('Digite uma opção válida!')
         except KeyboardInterrupt:
