@@ -232,7 +232,7 @@ class Estoque:
                 with open(caminho, 'r', encoding='UTF-8') as arquivo:
                     conteudo = arquivo.read()
                 if conteudo != '':
-                    ret: Estoque = jsonpickle.decode(conteudo)
+                    ret: dict = jsonpickle.decode(conteudo)
 
                     self.estoque = ret['Produtos']
                     if certeza:
@@ -307,7 +307,7 @@ class Carrinho:
         if len(self.carrinho) > 0:
             print('Produtos Disponíveis:')
             for item in self.carrinho:
-                print(f'Produto: {item.nome} | Preço: {item.preco} | Quantidade: {item.quantidade}')
+                print(f'Produto: {item.nome} | Preço: R${item.preco:.2f} | Quantidade: x{item.quantidade}')
         else:
             print('O carrinho está vazio.')
 
@@ -384,10 +384,13 @@ class Carrinho:
     def finalizar_carrinho(self):
         if len(self.carrinho) > 0:
             print('Produtos no carrinho:')
+            print('-' * 30)
             for item in self.carrinho:
-                print(f'{item.nome} | R${item.preco} | x{item.quantidade}')
+                print(f'Produto: {item.nome} | Preço: R${item.preco:.2f} | Quantidade: x{item.quantidade}')
+                print('-' * 30)
 
             print(f'O valor total é de R${self.preco_total:.2f}')
+            print('-' * 30)
             self.estoque.guardar_produtos(exibe_mensagem=False)
         else:
             print('O carrinho está vazio.')

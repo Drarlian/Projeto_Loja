@@ -5,9 +5,7 @@ from time import sleep
 
 def menu_base():
     while True:
-        print('-' * 60)
-        print('Mercadinho Hype'.center(60, '-'))
-        print('-' * 60)
+        cabecalho(' Mercadinho Hype ')
 
         print('Selecione uma opção:')
         print('1 - Funcionário')
@@ -30,7 +28,7 @@ def menu_funcionario():
     estoque: Estoque = Estoque()
 
     while True:
-        print('-' * 60)
+        cabecalho(' Mercadinho Hype - Gerencia ')
 
         print('Selecione uma opção:')
         print('1 - Listar produtos')
@@ -69,7 +67,7 @@ def menu_cliente():
     carrinho: Carrinho = Carrinho()
 
     while True:
-        print('-' * 60)
+        cabecalho(' Mercadinho Hype ')
 
         print('Selecione uma opção:')
         print('1 - Visualizar produtos')
@@ -110,3 +108,9 @@ def menu_cliente():
             exit()
         else:
             print('Opção inválida!')
+
+
+def cabecalho(mensagem: str) -> None:
+    print('-' * 60)
+    print(mensagem.center(60, '-'))
+    print('-' * 60)
