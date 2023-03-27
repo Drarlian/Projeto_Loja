@@ -1,5 +1,5 @@
 from verifica.verifica_dado import verifica_int, verifica_float
-from models.produtos import Produto, Estoque, Carrinho
+from models.produtos import Estoque, Carrinho
 from time import sleep
 
 
@@ -33,39 +33,31 @@ def menu_funcionario():
         print('-' * 60)
 
         print('Selecione uma opção:')
-        print('1 - Cadastrar produto')
-        print('2 - Listar produtos')
+        print('1 - Listar produtos')
+        print('2 - Cadastrar produto')
         print('3 - Remover produto')
-        print('4 - Guardar produtos no sistema')
-        print('5 - Carregar produtos do sistema')
-        print('6 - Voltar')
-        print('7 - Sair do sistema')
+        print('4 - Voltar')
+        print('5 - Sair do sistema')
 
         opcao: int = verifica_int('Digite a opção: ')
 
+
         if opcao == 1:
+            estoque.listar_produtos_estoque()
+            sleep(2)
+        elif opcao == 2:
             nome: str = str(input('Digite o nome do produto: '))
             preco: float = verifica_float('Digite o preço do produto: ')
             quantidade: int = verifica_int('Digite a quantidade: ')
-            produto = Produto(nome, preco, quantidade)
-            estoque.cadastrar_produto_estoque(produto)
-            sleep(2)
-        elif opcao == 2:
-            estoque.listar_produtos_estoque()
+            estoque.cadastrar_produto_estoque(nome, preco, quantidade)
             sleep(2)
         elif opcao == 3:
             produto: str = str(input('Digite o nome do produto: '))
             quantidade: int = verifica_int('Digite a quantidade: ')
             estoque.remover_produto_estoque(produto, quantidade)
         elif opcao == 4:
-            estoque.guardar_produtos()
-            sleep(2)
-        elif opcao == 5:
-            estoque.carregar_produtos()
-            sleep(2)
-        elif opcao == 6:
             menu_base()
-        elif opcao == 7:
+        elif opcao == 5:
             print('Volte sempre :)')
             sleep(1)
             exit()

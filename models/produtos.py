@@ -1,20 +1,16 @@
 class Produto:
-    contador: int = 1
-
     def __init__(self, nome: str, preco: float, quantidade: int = 1) -> None:
-        self.__id: int = Produto.contador
-        self.__nome: str = nome.lower()
-        self.__preco: float = preco
-        self.__quantidade: int = quantidade
-        Produto.contador += 1
-
-        """
-        if self.__verificar_arquivo_estoque():
-            self.__id: int = self.__pegar_ultimo_id() + 1
+        if self.verificar_produto_existe_no_estoque(nome):
+            produto = self.__pegar_dados_produto(nome)
+            self.__id: int = produto.id
+            self.__nome: str = nome.lower()
+            self.__preco: float = preco
+            self.__quantidade: int = produto.quantidade + quantidade
         else:
-            self.__id: int = Produto.contador
-            Produto.contador += 1
-        """
+            self.__id: int = self.__gerar_id_produto()
+            self.__nome: str = nome.lower()
+            self.__preco: float = preco
+            self.__quantidade: int = quantidade
 
     @property
     def id(self) -> int:
@@ -45,33 +41,69 @@ class Produto:
         self.__quantidade = quantidade
 
     def __str__(self) -> str:
-        return f'Id: {self.id} | Produto: {self.nome} | Preço: R${self.preco} | Quantidade: {self.quantidade}'
+        return f'Id: {self.id} | Produto: {self.nome} | Preço: R${self.preco:.2f} | Quantidade: {self.quantidade}'
 
-    """
-    def __verificar_arquivo_estoque(self) -> bool:
-        import os
+
+    def verificar_produto_existe_no_estoque(self, nome: str) -> bool:
+        """
+        Verifico se o produto com o nome informado existe no arquivo "info_estoque.json"
+        """
+        from os import path
+        from jsonpickle import decode
 
         caminho: str = 'dados\\info_estoque.json'
-        if os.path.exists(caminho):
-            return True
+
+        if path.exists(caminho):
+            with open(caminho, 'r', encoding='UTF-8') as arquivo:
+                conteudo: str = arquivo.read()
+            if conteudo != '':
+                ret: dict = decode(conteudo)
+                for produto in ret['Produtos']:
+                    if produto.nome == nome.lower():
+                        return True
         return False
-    """
 
-    """
-    def __pegar_ultimo_id(self) -> int:
-        import jsonpickle
+    def __pegar_dados_produto(self, nome: str):
+        from jsonpickle import decode
 
         caminho: str = 'dados\\info_estoque.json'
-        with open(caminho, 'r', encoding='UTF-8') as arquivo:
-            conteudo = arquivo.read()
-            ret: Estoque = jsonpickle.decode(conteudo)
 
-        return ret['Produtos'][-1].id
-    """
+        with open(caminho, 'r', encoding='UTF-8') as arquivo:
+            conteudo: str = arquivo.read()
+            ret: dict = decode(conteudo)
+            for produto in ret['Produtos']:
+                if produto.nome == nome.lower():
+                    return produto
+        return False
+
+    def __gerar_id_produto(self) -> int:
+        from os import path
+        from jsonpickle import decode
+
+        caminho = 'dados\\info_estoque.json'
+
+        if path.exists(caminho):
+            with open(caminho, 'r', encoding='UTF-8') as arquivo:
+                conteudo: str = arquivo.read()
+            if conteudo != '':
+                ret: dict = decode(conteudo)
+                maior_id: int = None
+                comeco: bool = True
+                for produto in ret['Produtos']:
+                    if comeco:
+                        maior_id = produto.id
+                        comeco = False
+                    else:
+                        if produto.id > maior_id:
+                            maior_id = produto.id
+                return maior_id + 1
+        return 1
+
 
 class Estoque:
     def __init__(self) -> None:
-        self.__estoque: list = []
+        self.__estoque: list = None
+        self.carregar_produtos(certeza=False)
 
     @property
     def estoque(self) -> list:
@@ -81,9 +113,16 @@ class Estoque:
     def estoque(self, estoque: list) -> None:
         self.__estoque = estoque
 
-    def cadastrar_produto_estoque(self, item: Produto) -> None:
-        self.estoque.append(item)
-        print(f'{item.nome}(x{item.quantidade}) foi adicionado ao estoque.')
+    def cadastrar_produto_estoque(self, nome: str, preco: float, quantidade: int = 1) -> None:
+        if self.verificar_produto_existe_estoque(nome.lower(), exibe_mensagem=False):
+            self.__atualizar_preco_produto(nome, preco)
+            self.aumentar_quantidade_estoque(nome.lower(), quantidade)
+            print(f'{nome.lower()} já existia no estoque, foram adicionadas x{quantidade} unidades')
+        else:
+            produto = Produto(nome, preco, quantidade)
+            self.estoque.append(produto)
+            print(f'{nome.lower()}(x{quantidade}) foi adicionado ao estoque.')
+            self.guardar_produtos(exibe_mensagem=False)
 
     def remover_produto_estoque(self, nome: str, quantidade: int = 1):
         if self.verificar_produto_existe_estoque(nome):
@@ -92,9 +131,15 @@ class Estoque:
     def recadastrar_produto_estoque(self, nome: str, preco: float, quantidade: int, *, exibe_mensagem: bool = True) -> None:
         if self.verificar_produto_existe_estoque(nome, exibe_mensagem=exibe_mensagem):
             self.aumentar_quantidade_estoque(nome, quantidade)
-        else:
+        else:  # -> Esse else não vai acontecer nunca, pois os produtos não são mais removidos do estoque.
             prod = Produto(nome, preco, quantidade)
             self.estoque.append(prod)
+            self.guardar_produtos(exibe_mensagem=False)
+
+    def __atualizar_preco_produto(self, nome: str, preco: float) -> None:
+        for produto in self.__estoque:
+            if produto.nome == nome:
+                produto.preco = preco
 
     def listar_produtos_estoque(self) -> None:
         if len(self.estoque) > 0:
@@ -109,6 +154,7 @@ class Estoque:
             if nome.lower() == produto.nome:
                 produto.quantidade += quantidade
                 break
+        self.guardar_produtos(exibe_mensagem=False)
 
     def diminuir_quantidade_estoque(self, nome: str, quantidade: int = 1, *, informa: bool = False) -> None:
         for produto in self.estoque:
@@ -117,8 +163,11 @@ class Estoque:
                     if quantidade > produto.quantidade:
                         print('Quantidade inválida!')
                         quantidade = 1
-                    self.estoque.remove(produto)
+                    produto.quantidade = 0
                     break
+                elif produto.quantidade == 0:
+                    informa = False
+                    print(f'Não existem unidades de {nome.lower()} no estoque.')
                 else:
                     if produto.quantidade > quantidade:
                         produto.quantidade -= quantidade
@@ -127,6 +176,7 @@ class Estoque:
                         quantidade = 1
                         produto.quantidade -= 1
                 break
+        self.guardar_produtos(exibe_mensagem=False)
 
         if informa:
             print(f'{nome.capitalize()}(x{quantidade}) foi removido(a) do estoque.')
@@ -143,6 +193,14 @@ class Estoque:
 
         if exibe_mensagem:
             print('O estoque está vazio.')
+
+    def verificar_quantidade_produto_igual_zero(self, nome: str) -> bool:
+        for produto in self.estoque:
+            if produto.nome == nome.lower():
+                if produto.quantidade == 0:
+                    return True
+                else:
+                    return False
 
     def guardar_produtos(self, exibe_mensagem: bool = True) -> None:
         import jsonpickle
@@ -173,11 +231,14 @@ class Estoque:
             if path.exists(caminho):
                 with open(caminho, 'r', encoding='UTF-8') as arquivo:
                     conteudo = arquivo.read()
+                if conteudo != '':
                     ret: Estoque = jsonpickle.decode(conteudo)
 
-                self.estoque = ret['Produtos']
-                if certeza:
-                    print('Estoque atualizado.')
+                    self.estoque = ret['Produtos']
+                    if certeza:
+                        print('Estoque atualizado.')
+                else:
+                    print('Não existem dados no estoque.')
             else:
                 print('Não existem dados armazenados.')
         else:
@@ -186,7 +247,6 @@ class Estoque:
 class Carrinho:
     def __init__(self) -> None:
         self.__estoque: Estoque = Estoque()
-        self.__estoque.carregar_produtos(certeza=False)
         self.__carrinho: list = []
         self.__preco_total: float = 0
 
@@ -217,22 +277,25 @@ class Carrinho:
     def adicionar_produto_carrinho(self, nome: str, quantidade: int = 1) -> None:
         import copy
         if self.estoque.verificar_produto_existe_estoque(nome, exibe_mensagem=False):
-            if not self.__confirma_quantidade_estoque(nome, quantidade):
-                print('Quantidade insuficiente no estoque.')
-                print('Quantidade definida como: 1')
-                quantidade = 1
+            if not self.estoque.verificar_quantidade_produto_igual_zero(nome):
+                if not self.__confirma_quantidade_estoque(nome, quantidade):
+                    print('Quantidade insuficiente no estoque.')
+                    print('Quantidade definida como: 1')
+                    quantidade = 1
 
-            if self.__verifica_produto_existe_carrinho(nome, exibe_mensagem=False):
-                self.__aumentar_quantidade_carrinho(nome, quantidade)
+                if self.__verifica_produto_existe_carrinho(nome, exibe_mensagem=False):
+                    self.__aumentar_quantidade_carrinho(nome, quantidade)
+                else:
+                    produto_temporario = copy.deepcopy(self.__converter_nome_para_objeto(nome))
+                    produto_temporario.quantidade = quantidade
+                    self.carrinho.append(produto_temporario)
+
+                self.estoque.diminuir_quantidade_estoque(nome, quantidade)
+                self.__aumentar_preco_total(nome, quantidade)
+
+                print(f'{nome.capitalize()}(x{quantidade}) foi adicionado(a) ao carrinho.')
             else:
-                produto_temporario = copy.deepcopy(self.__converter_nome_para_objeto(nome))
-                produto_temporario.quantidade = quantidade
-                self.carrinho.append(produto_temporario)
-
-            self.estoque.diminuir_quantidade_estoque(nome, quantidade)
-            self.__aumentar_preco_total(nome, quantidade)
-
-            print(f'{nome.capitalize()}(x{quantidade}) foi adicionado(a) ao carrinho.')
+                print('Produto esgotado.')
         else:
             print('Produto indisponível.')
 
